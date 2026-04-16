@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>토목기사 실기 암기 도우미</title>
+    <title>토목기사 실기 암기 도우미 (최종판)</title>
     <style>
         :root {
             --primary-color: #4A90E2;
@@ -60,8 +60,8 @@
         button:active { transform: scale(0.97); }
         .btn-main { background-color: var(--primary-color); color: white; width: 85%; max-width: 320px; }
         .btn-sub { background-color: #fff; color: var(--primary-color); border: 2px solid var(--primary-color); width: 85%; max-width: 320px; }
-        .btn-correct { background-color: var(--success-color); color: white; }
-        .btn-wrong { background-color: var(--danger-color); color: white; }
+        .btn-correct { background-color: var(--success-color); color: white; width: 40%; max-width: 150px; }
+        .btn-wrong { background-color: var(--danger-color); color: white; width: 40%; max-width: 150px; }
         .btn-home { background-color: #6c757d; color: white; margin-top: 25px; font-size: 14px; }
 
         input { 
@@ -78,6 +78,36 @@
         #progress { font-weight: bold; margin-bottom: 10px; color: #888; font-size: 0.85rem; }
         #feedback { min-height: 28px; margin: 10px 0; font-weight: bold; font-size: 1.1rem; }
         .hidden { display: none; }
+
+        /* 결과 리스트 스타일 */
+        .result-list {
+            width: 95%;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .result-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 5px;
+        }
+        .result-item:last-child { border-bottom: none; }
+        .res-q { font-weight: bold; color: #444; margin-bottom: 5px; }
+        .res-a { font-size: 0.9rem; color: #666; }
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 8px;
+            color: white;
+        }
+        .tag-correct { background-color: var(--success-color); }
+        .tag-wrong { background-color: var(--danger-color); }
     </style>
 </head>
 <body>
@@ -134,12 +164,13 @@
 <div id="result" class="hidden">
     <h3>🎯 결과</h3>
     <div class="card" id="resultText"></div>
+    <div id="resultListContainer" class="result-list"></div>
     <button class="btn-main" onclick="reviewWrong()">❌ 틀린 문제 복습</button><br>
     <button class="btn-home" onclick="restart()">🔄 처음으로</button>
 </div>
 
 <script>
-// --- 데이터 섹션 (이전 data.js 내용) ---
+// --- 데이터 섹션 (기존과 동일) ---
 const originalCards = [
 {q:"아스팔트 실코트 목적",a:"수밀성 증대 / 미끄럼저항 증대 / 내구성 증대"},
 {q:"터널 NATM 지보재",a:"Rock bolt / Shotcrete / Steel Rib / Wire mesh"},
@@ -168,13 +199,13 @@ const originalCards = [
 {q:"현장타설 콘크리트 말뚝 종류", a:"RCD 공법 / earth drill 공법 / Benoto 공법 / ReB 공법"},
 {q:"가물막이 공사 中 중력식 공법", a:"Caisson식 공법 / Box식 공법 / 강판 cell식 공법 / 흙댐식 공법"},
 {q:"가체절공 종류", a:"한겹 Sheet Pile 공법 / 두겹 Sheet Pile 공법 / 강관 Sheet Pile 공법 / Cell식 공법 / Ring Beam식 공법"},
-{q:"경화촉진제 / 한중콘크리트用 / 수화열&조기강도 촉진", a:"염화칼슘(CaCl2)"},
+{q:"경화촉진제 / 한중콘크리트용 / 수화열&조기강도 촉진", a:"염화칼슘(CaCl2)"},
 {q:"Sand Drain 공법 中 Sand Mat의 역할", a:"지하수위 저하 / 압밀 촉진 / 시공기계의 주행성 확보"},
 {q:"발파 시 진동치를 기준치 이하로 제어하는 방법", a:"저폭속의 폭약 사용 / 분할 발파 / 장약량의 제한"},
 {q:"흙막이공의 흙막이벽 근입 깊이 계산 시 가장 중요한 것", a:"파이핑에 대한 안정 / 히빙에 대한 안정 / 토압에 대한 안정"},
 {q:"강재 or Concrete 블록을 높은 곳에서 낙하시켜 지반 개량", a:"동압밀 공법 / 동다짐 공법"},
 {q:"투수계수에 영향 미치는 요소", a:"흙입자의 입경 / 물의 단위 중량 / 물의 점성계수 / 공극비 / 합성 형상계수"},
-{q:"보강토 공법의 기본구성요소", a:"뒷채움재 / 보강띠 / 전면판"},
+{q:"보강토 공법의 기본구성소", a:"뒷채움재 / 보강띠 / 전면판"},
 {q:"고무아스팔트의 장점", a:"내노화성이 크다 / 부착력, 응집력이 크다 / 마찰계수가 크다 / 감온성 적다"},
 {q:"모래지반에서 N치로 구할 수 있는 토질 정수", a:"상대밀도 / 탄성계수 / 내부 마찰각 / 침하량 / 지지력 계수"},
 {q:"AE제 특징", a:"Workability 개선 / 사용수량 감소 / Bleeding 감소 / 수축, 균열 감소 / 수밀성 증대"},
@@ -392,7 +423,8 @@ const originalCards = [
 
 let cards=[], current=0, wrong=[], mode="card", answerVisible=false;
 let examMode = false, score = 0, timer, timeLeft = 600, tempMode = "";
-let isWaiting = false;
+// 학습 기록을 저장할 배열 추가
+let studyHistory = [];
 
 function start(m){ examMode = false; mode = m; cards = [...originalCards]; initGame(); }
 function openRandomMenu(){
@@ -422,7 +454,7 @@ function startExam(){
 }
 
 function initGame() {
-    current = 0; wrong = []; score = 0; isWaiting = false;
+    current = 0; wrong = []; score = 0; studyHistory = []; // 기록 초기화
     document.getElementById("start").style.display="none";
     document.getElementById("main").classList.remove("hidden");
     document.getElementById("result").classList.add("hidden");
@@ -432,32 +464,37 @@ function initGame() {
 
 function applyModeUI(){
     document.getElementById("typingArea").classList.toggle("hidden", mode !== "typing");
-    document.getElementById("showBtn").classList.toggle("hidden", mode !== "card");
+    document.getElementById("showBtn").style.display = (mode === "card" && !examMode) ? "inline-block" : "none";
+    document.getElementById("markButtons").classList.add("hidden");
 }
 
 function load(){
     if(current >= cards.length){ showResult(); return; }
-    isWaiting = false;
     answerVisible = false;
     document.getElementById("feedback").innerText = "";
     document.getElementById("input").value = "";
-    document.getElementById("markButtons").classList.add("hidden");
+    
+    if(mode === "card") {
+        document.getElementById("markButtons").classList.add("hidden");
+        document.getElementById("showBtn").style.display = "inline-block";
+    }
+
     if(!examMode) document.getElementById("progress").innerText = `진행도: ${current+1}/${cards.length}`;
     
     document.getElementById("card").innerText = cards[current].q;
     if(mode === "typing") document.getElementById("input").focus();
 }
 
-function showAnswer(){ answerVisible = true; updateCard(); }
-
-function updateCard(){
+function showAnswer(){ 
+    answerVisible = true; 
     let c = cards[current];
     document.getElementById("card").innerHTML = `<small style='color:#888; font-size:0.8rem;'>${c.q}</small><br><br><span style='color:var(--primary-color)'>${c.a}</span>`;
     document.getElementById("markButtons").classList.remove("hidden");
-    document.getElementById("showBtn").classList.add("hidden");
+    document.getElementById("showBtn").style.display = "none";
 }
 
 function similarity(a, b) {
+    if (!a) return 0;
     a = a.replace(/\s+/g, "").toLowerCase(); b = b.replace(/\s+/g, "").toLowerCase();
     let dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
     for (let i = 0; i <= a.length; i++) dp[i][0] = i;
@@ -471,37 +508,34 @@ function similarity(a, b) {
 }
 
 function check(){
-    if(isWaiting) { load(); return; } 
-    
-    let input = document.getElementById("input").value.trim();
-    if(!input) return;
-    
-    let ans = cards[current].a;
-    let isCorrect = similarity(input, ans) >= 0.7;
+    let input = document.getElementById("input").value.trim().toLowerCase();
+    let ans = cards[current].a.toLowerCase();
+    let isCorrect = (input !== "") && (similarity(input, ans) >= 0.8 || input.includes(ans));
+
+    // 히스토리에 기록
+    studyHistory.push({ q: cards[current].q, a: cards[current].a, user: input || "(미입력)", correct: isCorrect });
 
     if(isCorrect) {
         score++;
-        if(!examMode) {
-            document.getElementById("feedback").innerHTML = `<span style="color:var(--success-color)">✅ 정답!</span>`;
-            setTimeout(() => { current++; load(); }, 500); 
-        } else {
-            current++; load();
-        }
+        if(!examMode) document.getElementById("feedback").innerHTML = `<span style="color:var(--success-color)">✅ 맞음</span>`;
     } else {
         wrong.push(cards[current]);
-        if(!examMode) {
-            isWaiting = true; 
-            document.getElementById("feedback").innerHTML = `<span style="color:var(--danger-color)">❌ 오답 (엔터 시 다음)</span><br><small>정답: ${ans}</small>`;
-        } else {
-            current++; load();
-        }
+        if(!examMode) document.getElementById("feedback").innerHTML = `<span style="color:var(--danger-color)">❌ 틀림 → ${cards[current].a}</span>`;
     }
+
+    current++;
+    if(examMode) load();
+    else setTimeout(load, 2000);
 }
 
 function mark(correct){
+    // 카드 모드에서는 사용자가 직접 누르므로 정답 여부와 상관없이 현재 카드 기록
+    studyHistory.push({ q: cards[current].q, a: cards[current].a, user: "카드 확인", correct: correct });
+
     if(!correct) wrong.push(cards[current]);
     else score++;
-    current++; load();
+    current++; 
+    load();
 }
 
 function startTimer(){
@@ -519,6 +553,21 @@ function showResult(){
     document.getElementById("main").classList.add("hidden");
     document.getElementById("result").classList.remove("hidden");
     document.getElementById("resultText").innerHTML = `맞은 개수: ${score} / ${cards.length}<br>틀린 개수: ${wrong.length}`;
+
+    // 리스트 생성
+    let listHtml = "<h4>학습 리포트</h4>";
+    studyHistory.forEach((item, index) => {
+        const tagClass = item.correct ? "tag-correct" : "tag-wrong";
+        const tagText = item.correct ? "맞음" : "틀림";
+        listHtml += `
+            <div class="result-item">
+                <div class="res-q"><span class="status-tag ${tagClass}">${tagText}</span> ${index + 1}. ${item.q}</div>
+                <div class="res-a">정답: ${item.a}</div>
+                ${mode === 'typing' ? `<div class="res-a" style="color: ${item.correct ? '#4A90E2' : '#dc3545'}">내 답: ${item.user}</div>` : ''}
+            </div>
+        `;
+    });
+    document.getElementById("resultListContainer").innerHTML = listHtml;
 }
 
 function reviewWrong(){ if(wrong.length===0) return; cards = [...wrong]; initGame(); }
@@ -527,12 +576,13 @@ function backToStart(){ location.reload(); }
 function restart(){ location.reload(); }
 function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
 
+// 키보드 제어
 document.addEventListener("keydown",e=>{
     if(e.key==="Enter"){
         const mainVisible = !document.getElementById("main").classList.contains("hidden");
         if(mainVisible) {
             if(mode==="typing") check();
-            else if(!answerVisible) showAnswer();
+            else if(!answerVisible) showAnswer(); 
         }
     }
 });
