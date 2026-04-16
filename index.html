@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>토목기사 실기 암기 도우미</title>
+    <style>
+        :root {
+            --primary-color: #4A90E2;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --bg-color: #f4f7f9;
+        }
+
+        body { 
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif; 
+            text-align: center; 
+            padding: 15px; 
+            background-color: var(--bg-color);
+            margin: 0;
+            color: #333;
+        }
+
+        h2 { margin-top: 30px; color: #2c3e50; letter-spacing: -1px; }
+        .subtitle { color: #666; margin-bottom: 30px; font-size: 0.95rem; }
+
+        .card {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px 20px;
+            margin: 20px auto;
+            width: 90%;
+            max-width: 600px;
+            min-height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.6;
+            white-space: pre-line;
+            word-break: keep-all;
+        }
+
+        button { 
+            margin: 6px; 
+            padding: 14px 24px; 
+            font-size: 16px; 
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        button:active { transform: scale(0.97); }
+        .btn-main { background-color: var(--primary-color); color: white; width: 85%; max-width: 320px; }
+        .btn-sub { background-color: #fff; color: var(--primary-color); border: 2px solid var(--primary-color); width: 85%; max-width: 320px; }
+        .btn-correct { background-color: var(--success-color); color: white; width: 40%; max-width: 150px; }
+        .btn-wrong { background-color: var(--danger-color); color: white; width: 40%; max-width: 150px; }
+        .btn-home { background-color: #6c757d; color: white; margin-top: 25px; font-size: 14px; }
+
+        input { 
+            padding: 16px; 
+            width: 85%; 
+            max-width: 500px;
+            font-size: 18px; 
+            border: 2px solid #ddd;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            outline: none;
+        }
+
+        #progress { font-weight: bold; margin-bottom: 10px; color: #888; font-size: 0.85rem; }
+        #feedback { min-height: 28px; margin: 10px 0; font-weight: bold; font-size: 1.1rem; }
+        .hidden { display: none; }
+
+        /* 결과 리스트 스타일 */
+        .result-list {
+            width: 95%;
+            max-width: 600px;
+            margin: 20px auto;
+            text-align: left;
+            background: #fff;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+        }
+        .result-item {
+            border-bottom: 1px solid #eee;
+            padding: 15px 5px;
+        }
+        .result-item:last-child { border-bottom: none; }
+        .res-q { font-weight: bold; color: #444; margin-bottom: 5px; }
+        .res-a { font-size: 0.9rem; color: #666; }
+        .status-tag {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-right: 8px;
+            color: white;
+        }
+        .tag-correct { background-color: var(--success-color); }
+        .tag-wrong { background-color: var(--danger-color); }
+    </style>
+</head>
+<body>
+
+<div id="start">
+    <h2>🏗️ 토목기사 실기 암기 도우미</h2>
+    <p class="subtitle">효율적인 암기를 위한 학습 모드 선택</p>
+    <button class="btn-main" onclick="start('card')">📖 1단계: 눈으로 암기 (플래시카드)</button><br>
+    <button class="btn-main" onclick="start('typing')">⌨️ 2단계: 손으로 암기 (타이핑)</button><br>
+    <button class="btn-sub" onclick="openRandomMenu()">🎲 랜덤 학습 모드</button><br>
+    <button class="btn-sub" onclick="startExam()">📝 실전 모의고사 (10문항)</button>
+</div>
+
+<div id="randomMenu" class="hidden">
+    <h3>🎲 랜덤 학습 설정</h3>
+    <div id="methodArea">
+        <p class="subtitle">먼저 진행 방식을 선택하세요</p>
+        <button class="btn-main" onclick="selectMethod('card')">📖 카드 모드</button><br>
+        <button class="btn-main" onclick="selectMethod('typing')">⌨️ 타이핑 모드</button>
+    </div>
+    <div id="countArea" class="hidden">
+        <p class="subtitle" id="selectedMethodText" style="color:var(--primary-color); font-weight:bold;"></p>
+        <p class="subtitle">문항 개수를 선택하면 시작합니다</p>
+        <button onclick="startRandom(10)">10개</button>
+        <button onclick="startRandom(30)">30개</button>
+        <button onclick="startRandom(50)">50개</button>
+        <button onclick="startRandom(100)">100개</button>
+        <button onclick="startRandom(150)">150개</button>
+        <button onclick="startRandom('all')">전체</button>
+    </div>
+    <br>
+    <button class="btn-home" onclick="backToStart()">⬅️ 처음으로</button>
+</div>
+
+<div id="main" class="hidden">
+    <div id="progress"></div>
+    <div class="card" id="card"></div>
+    <div id="typingArea" class="hidden">
+        <input id="input" type="text" placeholder="정답 입력 후 엔터" autocomplete="off">
+        <br>
+        <button class="btn-main" onclick="check()">확인 (Enter)</button>
+    </div>
+    <div id="feedback"></div>
+    <div id="controlButtons">
+        <button id="showBtn" class="btn-main" onclick="showAnswer()">정답 보기 (Enter)</button>
+        <div id="markButtons" class="hidden">
+            <button class="btn-correct" onclick="mark(true)">✅ 맞음</button>
+            <button class="btn-wrong" onclick="mark(false)">❌ 틀림</button>
+        </div>
+    </div>
+    <button class="btn-home" onclick="goHome()">⏮️ 처음으로</button>
+</div>
+
+<div id="result" class="hidden">
+    <h3>🎯 결과</h3>
+    <div class="card" id="resultText"></div>
+    <div id="resultListContainer" class="result-list"></div>
+    <button class="btn-main" onclick="reviewWrong()">❌ 틀린 문제 복습</button><br>
+    <button class="btn-home" onclick="restart()">🔄 처음으로</button>
+</div>
+
+<script>
+// --- 데이터 섹션 (기존과 동일) ---
+const originalCards = [
+{q:"아스팔트 실코트 목적",a:"수밀성 증대 / 미끄럼저항 증대 / 내구성 증대"},
+{q:"터널 NATM 지보재",a:"Rock bolt / Shotcrete / Steel Rib / Wire mesh"},
+{q:"동상 조건",a:"동상받기 쉬운 흙 / 물 공급 충분 / 모관상승고 큼"},
+{q:"숏크리트 건식방법 단점",a:"반발량 많다 / 분진발생 / 품질관리 어려움"},
+{q:"Sand drain에 비해 Pack drain의 장점", a:"경제적 / 품질관리 용이 / 시공용이 / 공기단축"},
+{q:"아스팔트포장 보수방법", a:"절삭 공법 / Over lay 공법 / 절삭 Over lay 공법"},
+{q:"RMR 분류 고려사항 (RMR 구성요소, Q-system)", a:"지하수의 상태 / 불연속면의 간격 / 불연속면의 상태 / RQD / 암석의 강도"},
+{q:"음을 이용한 안정도 추정", a:"AE"},
+{q:"Deep Well 공법이 효과적인 경우", a:"Well Point 적용이 곤란할 시 / 사질토의 지하수위 저하 시 / 히빙(Heaving)이나 보일링(Boiling)현상 발생 시"},
+{q:"기초의 요구 조건", a:"최소한의 근입깊이 확보 / 안전하게 하중 지지 / 침하가 허용치 이내 / 경제적/기술적으로 시공 가능"},
+{q:"콘크리트 온도 변화나 함수량에 따른 응력을 경감시키는 것", a:"줄눈 (joint)"},
+{q:"물리적 탐사법(물탐) 종류", a:"탄성파 탐사법 / 전기 탐사법 / 자기탐사법 / 중력 탐사법 / 방사능 탐사법 / 음파 탐사법"},
+{q:"슬라임 제거 공법", a:"Suction pump / 수중 펌프 / Water jet / Air lift"},
+{q:"보일링(boiling)현상 방지 대책", a:"굴착저면을 고착 / 지하수위 저하 / 흙막이의 근입 깊이를 깊게"},
+{q:"히빙(Heaving) 방지 대책", a:"굴착면에 하중 재하 / 지반 개량 / 흙막이의 근입 깊이를 깊게 / 표토제거 / 어스앵커"},
+{q:"Heaving의 정의", a:"연약 점토지반 굴착 시 흙막이벽 전·후의 흙의 중량차이 때문에 굴착저면이 부풀어오르는 현상"},
+{q:"댐내부 검사랑 목적", a:"그라우팅 / 온도 / 수축량 / 양압력"},
+{q:"공기케이슨 단점", a:"기계설비 고가 / 케이슨병 발병 / 노무비 고가 / 소음, 진동 크다 / 굴착 깊이에 제한"},
+{q:"콘크리트의 분리와 블리딩(bleeding) 방지 대책", a:"분말도 큰 시멘트 사용 / 단위 시멘트량 크게 / 단위수량 작게 / AE제 사용"},
+{q:"PSC교량 중 동바리 사용 안 하는 현장타설 공법", a:"FCM 공법 / ILM 공법 / MSS 공법"},
+{q:"암거 매설공법 中 도로횡단하여 암거 구조를 설치할 경우", a:"Front Jacking Method"},
+{q:"Piezo cone으로 측정 가능한 값", a:"마찰저항 / 간극수압 / 선단 cone 저항"},
+{q:"레미콘의 현장품질관리시험 종류", a:"공기량 시험 / 강도 시험 / 슬럼프 시험 / 단위체적중량 시험 / 염화물 함유량 시험"},
+{q:"보조기층 지지력 개선방법 中 첨가제에 의한 공법", a:"역청 안정처리공법 / 시멘트 안정처리공법 / 화학적 재료에 의한 안정처리공법 / 석회 안정처리공법"},
+{q:"현장타설 콘크리트 말뚝 종류", a:"RCD 공법 / earth drill 공법 / Benoto 공법 / ReB 공법"},
+{q:"가물막이 공사 中 중력식 공법", a:"Caisson식 공법 / Box식 공법 / 강판 cell식 공법 / 흙댐식 공법"},
+{q:"가체절공 종류", a:"한겹 Sheet Pile 공법 / 두겹 Sheet Pile 공법 / 강관 Sheet Pile 공법 / Cell식 공법 / Ring Beam식 공법"},
+{q:"경화촉진제 / 한중콘크리트용 / 수화열&조기강도 촉진", a:"염화칼슘(CaCl2)"},
+{q:"Sand Drain 공법 中 Sand Mat의 역할", a:"지하수위 저하 / 압밀 촉진 / 시공기계의 주행성 확보"},
+{q:"발파 시 진동치를 기준치 이하로 제어하는 방법", a:"저폭속의 폭약 사용 / 분할 발파 / 장약량의 제한"},
+{q:"흙막이공의 흙막이벽 근입 깊이 계산 시 가장 중요한 것", a:"파이핑에 대한 안정 / 히빙에 대한 안정 / 토압에 대한 안정"},
+{q:"강재 or Concrete 블록을 높은 곳에서 낙하시켜 지반 개량", a:"동압밀 공법 / 동다짐 공법"},
+{q:"투수계수에 영향 미치는 요소", a:"흙입자의 입경 / 물의 단위 중량 / 물의 점성계수 / 공극비 / 합성 형상계수"},
+{q:"보강토 공법의 기본구성소", a:"뒷채움재 / 보강띠 / 전면판"},
+{q:"고무아스팔트의 장점", a:"내노화성이 크다 / 부착력, 응집력이 크다 / 마찰계수가 크다 / 감온성 적다"},
+{q:"모래지반에서 N치로 구할 수 있는 토질 정수", a:"상대밀도 / 탄성계수 / 내부 마찰각 / 침하량 / 지지력 계수"},
+{q:"AE제 특징", a:"Workability 개선 / 사용수량 감소 / Bleeding 감소 / 수축, 균열 감소 / 수밀성 증대"},
+{q:"단단한 지반에 강말뚝 시공 시 강말뚝 선단에 설치하는 것", a:"슈(Shoe)"},
+{q:"방수성 높이고 기층 위에 역청재료를 살포하는 것", a:"프라임 코트(Prime coat)"},
+{q:"레미콘의 비비기와 운반 방법에 의한 분류", a:"센트럴 믹스트 콘크리트 / 쉬링크 믹스트 콘크리트 / 트랜싯 믹스트 콘크리트"},
+{q:"상판의 위치에 의하여 분류한 교량의 형식", a:"상로교 / 중로교 / 하로교 / 2층교"},
+{q:"시멘트 풍화 시 현상", a:"조기 강도 저하 / 응결 지연 / 비중 감소"},
+{q:"Earth anchor(어스앵커) 주요 구성요소", a:"앵커체 / 인장부 / 앵커두부"},
+{q:"표준관입시험 N치 수정 이유", a:"Rod 길이에 대한 수정 / 토질에 의한 수정 / 상재압에 의한 수정"},
+{q:"터널 보조공법의 분류", a:"Shotcrete / fore poling / grouting / Rock bolt / 강관 다단 그라우팅 / Pipe roof 공법"},
+{q:"된비빔 콘크리트를 다져서 시공하는 포장공법", a:"RCCP 공법"},
+{q:"지반조사를 위한 시료 채취 방법", a:"Scraper Bucket Sampling / Split spoon sampling / Thin wall sampling / Piston sampling"},
+{q:"Concrete의 균열 보수/보강 공법", a:"보강철근 이용방법 / 봉합법 / 그라우팅 / 에폭시 주입법 / 짜집기법"},
+{q:"Sand drain 공법에 비해 Pack drain의 단점", a:"장비의 규모가 크다 / 타설 심도 조절이 어렵다"},
+{q:"유동성을 양호하게 한 아스팔트", a:"컷백 아스팔트(Cut back asphalt)"},
+{q:"후면에 약발파 암반 균열 전면의 주발파 면이 깨끗한 암발파법", a:"Pre-splitting"},
+{q:"준설선의 종류", a:"버킷 준설선 / 그래브 준설선 / 펌프 준설선 / 디퍼 준설선"},
+{q:"생석회 말뚝 공법의 주요 효과", a:"탈수 효과 / 건조 효과 / 팽창 효과"},
+{q:"흙댐에 사용되는 필터 재료의 입도", a:"D15f / D15c / D85c (특정 공식 기준)"},
+{q:"Shotcrete 조건", a:"내구성 / 부착성 / 시공성 / 소요강도"},
+{q:"침하 촉진 방법 (침하공법)", a:"분사식 방법 / 발파식 방법 / 재하중식 방법 / 물하중식 방법"},
+{q:"지오텍스타일의 주요 기능", a:"보강 / 필터 / 분리 / 방수 및 차단 / 배수"},
+{q:"숏크리트(Shotcrete) 타설 시 사용되는 조강재", a:"알루민 소다 / 탄산소다 / 규산 소다"},
+{q:"말뚝 공사 시 부마찰력 줄이는 방법", a:"표면적이 작은 말뚝 사용 / 말뚝 표면에 역청재 도포 / 말뚝 지름보다 크게 Pre-boring"},
+{q:"서중 콘크리트 타설 시 주의사항", a:"지반과 거푸집 살수 / 비빈 후 신속 타설 / 타설 온도 35℃ 이하 / 콜드 조인트 방지"},
+{q:"탬핑 롤러의 종류", a:"Grid roller / Turn foot roller / Tapper foot roller / Sheeps foot roller"},
+{q:"필댐의 여수로의 종류", a:"측수로 여수로 / 슈트식 여수로 / 사이펀 여수로"},
+{q:"횡방향 지반 반력계수 구하는 현장 시험", a:"LLT / PMT / DMT"},
+{q:"파일이론에서 α, β, λ 방법의 목적", a:"점토의 주면마찰력 산출"},
+{q:"소성점토 불교란 시료의 일반적인 시험법", a:"비구속 팽창시험 / 팽창압 시험"},
+{q:"영구 구조물을 지표면에서 역순으로 시공하는 공법", a:"TOP down 공법 (역타 공법)"},
+{q:"주동토압 최소화 방법 (옹벽 뒷채움 시공 시)", a:"내부마찰각이 큰 재료 사용 / 배수처리 철저 / 지하수위 저하시키는 공법 / 점착력이 있는 재료 사용"},
+{q:"콘크리트 초기 균열의 원인에 따른 분류", a:"거푸집에 따른 균열 / 침하균열 / 소성수축균열"},
+{q:"슬래브가 솟아 오르는 좌굴현상", a:"blow up"},
+{q:"아스팔트포장에서 차바퀴 자국이 움푹 패이는 현상", a:"rutting"},
+{q:"배수터널의 장·단점", a:"장점: 구조상 안전, 보수 용이, 시공비 저렴 / 단점: 유지관리비 과다, 배수기능 저하시 불안정, 지반 침하"},
+{q:"지하굴착공사 中 안전목적의 계측기", a:"토압계 / 지반수직변위계 / 지하수위계 / 지중경사계 / 변형률계"},
+{q:"이음 없는 수밀성 구조물을 만드는 특수거푸집", a:"Slip form / Sliding form / Self climbing"},
+{q:"앵커식 널말뚝이 캔틸레버식에 비해 갖는 경제적효과", a:"널말뚝의 소요 근입 깊이 최소화 / 널말뚝의 단면적과 중량 감소"},
+{q:"터널이 편암으로 이상지압 받을 경우 대책 공법", a:"압성토 / 보호절취 / 갱구 부근 복공 콘크리트 시공"},
+{q:"콘크리트 운반 시 가장 중요한 사항", a:"슬럼프 저하 방지 / 신속한 운반 및 타설 / 재료분리 및 손실 방지 / 공기량 감소 방지"},
+{q:"유토곡선으로 구할 수 있는 것", a:"평균 운반거리 / 시공방법 산출 / 토량의 분배 / 토공기계 선정"},
+{q:"얕은 기초의 근입 깊이 결정 시 고려사항", a:"동결 깊이 / 지하수위 / 인접 구조물 / 체적변화"},
+{q:"2차 폭파 (조각 발파) 방법", a:"스네이크 보링법(Snake boring)"},
+{q:"수중콘크리트 시공방법", a:"콘크리트 펌프 / 포대 콘크리트 / 밑열림 상자 / 트레미"},
+{q:"Rock bolt의 기능", a:"봉합 효과 / 아치 형성 효과 / 보 형성 효과 / 내압 효과"},
+{q:"블리딩(Bleeding) 현상이 콘크리트에 미치는 영향", a:"내구성 감소 / 강도 감소 / 수밀성 감소"},
+{q:"줄눈 및 철근 유무에 따른 콘크리트 포장 구분", a:"JCP / JRCP / CRCP / PCP"},
+{q:"록 필 댐의 필터재의 기능", a:"토립자 유출 방지 / 완충 역할 / 코어재의 자기 치유작용 지원"},
+{q:"기성말뚝의 지지력 저하 요인", a:"침하량 / 세장비 / 이음 / 부주면마찰력"},
+{q:"사장교 케이블 교축방향 배치에 따른 분류", a:"하프형 / 방사형 / 부채형 / 스타형"},
+{q:"옹벽에 시공되는 배수공의 종류", a:"연속배면 배수공 / 저면 배수공 / 경사 배수공 / 간이 배수공"},
+{q:"연성포장과 강성포장의 표층역학 차이점", a:"연성포장: 전단응력 저항 및 하부 전달 / 강성포장: 전단응력과 횡응력에 저항"},
+{q:"콘크리트 압송성 향상 방안", a:"부배합 / 혼화제 사용 / 굵은골재 형상을 원형에 가깝게"},
+{q:"단기간에 기초처리 가능한 치환공법", a:"강제 치환 / 폭파 치환 / 굴착 치환"},
+{q:"강상자형교 박스단면 구성형태 분류", a:"단실박스 / 다실박스 / 다중박스"},
+{q:"고장력 볼트의 일반적 파괴형태", a:"전단파괴 / 지압파괴 / 인장파괴"},
+{q:"보강토벽 횡토압 저항 타이 설계 방법", a:"Rankine법 / Coulomb 응력법 / Coulomb 모멘트법"},
+{q:"지반보강이나 차수를 위한 주입공법 종류", a:"고압분사공법 / 침투주입공법 / 컴팩션 주입공법 / 혼합처리공법"},
+{q:"굳지 않은 콘크리트의 측압에 영향 미치는 인자", a:"다짐방법 / 부재 단면치수 / 진동 / 배합 / 치기 속도 / 온도"},
+{q:"우물통기초의 침하 시 편위의 원인", a:"유수에 의한 이동 / 지층의 경사 / 편토압 / 우물의 비대칭"},
+{q:"숏크리트의 rebound량 감소시키는 방법", a:"노즐 직각 시공 / 단위시멘트량 크게 / 단위수량 크게 / 잔골재율 크게 / 굵은골재 작게 / 습식공법"},
+{q:"방파제의 구조형식에 따른 분류", a:"혼성제 / 직립제 / 경사제"},
+{q:"기성고 공정곡선의 장점", a:"전체/계획 대비 진도 파악 용이 / 시공속도 및 가격상황 파악 용이 / 관리 목표 설정"},
+{q:"우물통의 제자리 놓기(거치) 방법", a:"발판식(비계식) / 부동식(예향식) / 축도법"},
+{q:"터널굴착 시 용수 대책 공법", a:"배수공법 / Well point / 동결 / 차수 / 물빼기 갱/보링 / 약액주입 / 압기 공법"},
+{q:"케이슨의 시공방법에 따른 분류", a:"박스 케이슨 / 공기케이슨 / 오픈 케이슨"},
+{q:"교대 설치 시 측방유동 최소화 방안", a:"구조물 이용 / 하중 경감 / 지반 개량"},
+{q:"역타공법의 장점", a:"공기 단축 / 근접시공 가능 / 저소음/저진동 / 지반 조건 관계없이 안전 / 벽체 깊이 제한 없음"},
+{q:"시멘트 콘크리트 포장의 평탄성 평가 방법", a:"7.6m 프로파일미터 측정 / 평탄성 지수(PrI)"},
+{q:"불도저 2대 이상이 토공판을 맞추어 전진하는 공법", a:"병렬 작업방식(병렬식 압토공법)"},
+{q:"장대교량시공법 중 동바리 사용 안 하는 공법", a:"FCM / ILM / MSS / PSM 공법"},
+{q:"점토지반에서 N치로 구할 수 있는 토질정수", a:"점착력 / 연경도 / 극한/허용지지력 / 일축압축강도"},
+{q:"암반의 초기응력 측정방법", a:"유한요소법 / 광탄성실험법 / 응력해방법"},
+{q:"건조단위중량 측정 방법", a:"고무막법 / 모래치환법 / 절삭법"},
+{q:"평판재하시험 결과로부터 항복하중을 구하는 방법", a:"S-P 법 / S-logP법 / S-logt 법 / logP-logS 법"},
+{q:"콘크리트-폴리머 복합체 콘크리트 종류", a:"PC / PIC / PCC"},
+{q:"암반 굴착현장에서 직접 탄성계수를 결정하는 방법", a:"공내 재하시험 / 동적 반복재하시험 / Jacking Test"},
+{q:"사질토 개량공법", a:"전기충격 / 바이브로플로테이션 / 다짐말뚝 / 다짐모래말뚝 / 폭파다짐 / 약액주입"},
+{q:"일반적으로 많이 쓰이는 양생방법", a:"전기양생 / 막양생 / 증기양생 / 습윤양생"},
+{q:"Earth Anchor의 지지방법에 따른 분류", a:"복합형 / 지압형 / 마찰형"},
+{q:"Rock bolt의 정착형식", a:"혼합형 / 전면 접합형 / 선단 정착형"},
+{q:"폭약효력계수 f=1인 것", a:"다이너마이트 No.1"},
+{q:"구조물의 내진설계방법", a:"정적 해석법 / 반응 스펙트럼 해석법 / 시간이력 해석법"},
+{q:"PSC의 단점", a:"변형이 크다 / 진동하기 쉽다 / 내화성이 작다 / 고도의 기술 및 재료비 고가"},
+{q:"PSC의 손실원인 (초기/장기)", a:"초기: 탄성변형, 마찰, 정착장치 활동 / 장기: 크리프, 건조수축, 릴랙세이션"},
+{q:"현장에서 도로 포장두께를 결정하는 시험방법", a:"PBT / CBR"},
+{q:"공사 관리의 3대 요소", a:"공정관리 / 원가관리 / 품질관리"},
+{q:"교대의 종류", a:"직벽교대 / T교대 / U형 교대 / 익벽교대"},
+{q:"전단력이 큰 곳 시공이음에 설치하는 철근", a:"전단보강철근"},
+{q:"응결/경화시간을 임의로 바꿀 수 있는 제트시멘트", a:"초속경 시멘트"},
+{q:"막대그래프 공정표의 용도", a:"간단한 공사 / 개략적인 공정표 / 보고용 및 선전용"},
+{q:"지오텍스타일의 제조법", a:"평직 / 능직 / 니들펀칭 / 스판본드 니들펀칭"},
+{q:"사질토가 전단저항을 잃게 되는 현상", a:"액상화현상"},
+{q:"신용있는 회사만을 선정하여 입찰", a:"지명경쟁입찰"},
+{q:"무소음, 무진동 공사에 적합한 폭약", a:"컴바이트"},
+{q:"토압과 수평력이 대단히 큰 경우 설치하는 교대", a:"부벽식 교대"},
+{q:"옹벽 마찰저항을 증가시킬 목적으로 사용하는 공법", a:"보강토공법"},
+{q:"FCM 공법의 구조형식", a:"라멘형식(중앙힌지형식) / 연속보식"},
+{q:"W/C 증가시키지 않고 슬럼프값을 크게 하는 방법", a:"감수제 사용 / 잔골재율 증대 / 분말도 큰 시멘트 사용 / AE제 사용"},
+{q:"토지, 지리 정보체계를 통칭", a:"GSIS(지형공간시스템)"},
+{q:"용수를 동반하는 연약지반 터널 공법 (도시 시공용)", a:"쉴드공법(Shield)"},
+{q:"캔틸레버식 옹벽구조물 설계 시 고려 외력", a:"토압 / 정하중 / 재하중"},
+{q:"콘크리트가 알칼리성을 상실하게 되는 것", a:"콘크리트의 중성화"},
+{q:"보강토벽의 경제적 높이", a:"보통 10~20m 이상"},
+{q:"토목섬유의 종류", a:"geotextile / geomembrance / geogrid / geocomposite"},
+{q:"토목섬유 중 차수 목적으로 쓰이는 것", a:"geomembrance"},
+{q:"버팀에 반력을 전달하는 수평보", a:"띠장"},
+{q:"부벽식 옹벽에서 부벽설치 이유", a:"전단력 감소 / 모멘트 감소"},
+{q:"레미콘에 물을 타는 문제의 근본적 해결용 콘크리트", a:"유동화 콘크리트"},
+{q:"우물통기초(오픈 케이슨)의 장점", a:"공사비 저렴 / 기계설비 간단 / 무진동 / 침하깊이 제한 없음"},
+{q:"합성형교 전단력에 저항하기 위해 설치하는 장치", a:"전단연결재"},
+{q:"건조상태 작업을 위해 설치하는 물 배제 구조물", a:"가체절공(Coffer dam)"},
+{q:"터널의 환기방식", a:"흡인식 / 배기식 / 송기식"},
+{q:"아스팔트포장의 장점 (도로포장 대비)", a:"양생기간 짧음 / 주행성 우수 / 보수 용이 / 시공성 우수"},
+{q:"차량 충격위험 방지 시설", a:"철제드럼 / 모래채우기 플라스틱통 / 하이드로셀 샌드위치"},
+{q:"토공 시공면 결정 시 고려사항", a:"절토량=성토량 / 암석 굴착량 최소 / 보상비 최소 / 위험지 피함 / 운반거리 최소"},
+{q:"파쇄 된 암반중의 불규칙한 균열 집합 존", a:"파쇄대(Fractured zone)"},
+{q:"Consolidation & Curtain grouting 실시 이유", a:"지반개량 및 균일성 확보 / 차수 및 양압력 경감 / 기초암반 열화방지"},
+{q:"강섬유보강 콘크리트가 유리한 점", a:"강도/인성/균열저항성/동결융해저항성/내구성 우수"},
+{q:"NATM 터널공사 시 반드시 실시하는 계측항목", a:"갱내 관찰조사 / 내공변위 측정 / 천단침하 측정 / Rock bolt 인발시험"},
+{q:"발포제를 주원료로 블록화하여 사용하는 경량성토공법", a:"EPS공법"},
+{q:"Drain paper의 구비조건", a:"투수성이 클 것 / 습윤강도가 클 것 / 투수성 변화 없을 것 / 변형 없을 것"},
+{q:"White base와 Black base란?", a:"White: 시멘트 기층 / Black: 아스팔트 안정처리 기층"},
+{q:"댐 성토 시험 시 시험 항목", a:"전단강도 / 투수 / 함수비 / 다짐 시험"},
+{q:"터널 3차원 거동을 2차원으로 해석하는 방법", a:"응력 분배법 / 강성 변화법 / 점탄성 해석법"},
+{q:"사면안정대책 중 안전율 증가 방법", a:"Soil nailing / Anchor / 말뚝 / 압성토 / 절토 공"},
+{q:"그물식 뿌리말뚝(root pile)의 특징", a:"이형철근 보강 현장타설 말뚝 / 지름 100~250mm / 하중지지 및 지반보강용"},
+{q:"액상화 대책 중 응력-변형조건을 바꾸는 방법", a:"지중 연속벽 설치법 / Sheet pile 설치법"},
+{q:"강트러스교 가설공법", a:"압출 공법 / Cantilever식 / Cable식 / Crane 공법"},
+{q:"공기케이슨을 사용하는 경우", a:"Heaving/Boiling 방지 / 건조상태 굴착 / 콘크리트 신뢰도 향상 / 지지력 시험 목적"},
+{q:"동다짐공법의 장점", a:"약품 불필요 / 광범위한 토질 적용 / 심층부까지 개량 가능"},
+{q:"X-R 관리도에서 관리에 이상이 있는 경우", a:"7개 이상 연속 중심선 한쪽 집합 / 주기적 파형 / 연속 상승 또는 하강"},
+{q:"댐 기초 Grouting 공사의 주입재료", a:"약액 / 아스팔트 용액 / 시멘트 용액 / 벤토나이트 용액"},
+{q:"마샬 안정도 시험으로부터 얻을 수 있는 것", a:"안정도 / 밀도 / 흐름값"},
+{q:"언더피닝공법(Under pinning) 적용 경우", a:"기초 지지력 보강 / 구조물 이동 / 기초 아래 다른 구조물 신설"},
+{q:"건조수축 균열 저감 및 충진성 향상을 위한 혼화제", a:"수축저감제"},
+{q:"NATM 계측 중 주변지반 안정 판단자료", a:"내공변위 측정"},
+{q:"Shotcrete 뿜어붙일 면 사전 처리", a:"위험물 제거 / 흡수성 면 미리 살수 / 동결 시 녹여서 물 제거"},
+{q:"하상 또는 수로바닥 세굴방지용 구조물", a:"감세공"},
+{q:"경량콘크리트 제조법", a:"무세골재 / 경량기포 / 경량골재 콘크리트"},
+{q:"주상구조 경량암반에서 발생하는 암반사면 파괴", a:"전도파괴"},
+{q:"댐의 유수전환방식", a:"가배수 터널공 / 반하천 체절공 / 가배수로 개거공"},
+{q:"쇄석을 깔아 공극을 채우면서 다짐하는 기층 공법", a:"Macadam 공법"},
+{q:"원심력 철콘 말뚝의 단점", a:"이음 신뢰성 낮음 / 무거움 / 항타 시 균열 위험 / N치 30 이상 타입 곤란"},
+{q:"교량의 내진 설계시 중량에 곱해주는 계수", a:"가속도 계수"},
+{q:"Sand pile 타입방법", a:"Water jet식 케이싱법 / earth auger법 / 압축공기식 케이싱법"},
+{q:"널말뚝에 사용되는 일반적 Anchor의 종류", a:"앵커판과 데드맨 / 수직앵커말뚝 / 타이백 앵커"},
+{q:"심발공(심빼기 발파공)의 종류", a:"노컷 / 번컷 / 스윙컷 / V컷"},
+{q:"유선망의 특징", a:"침투유량 동일 / 수두차 동일 / 유선과 등수두선 직교"},
+{q:"아스팔트 혼합물 단점을 개선한 골재 맞물림 공법", a:"SMA공법"},
+{q:"흙의 분류 기호", a:"자갈: G / 모래: S / 무기질 점토: C"},
+{q:"강성포장 보조기층의 주요기능", a:"동상방지 / 배수 / Slab 균등 지지"},
+{q:"상류측 지수벽과 중앙/하류측 석괴로 된 댐", a:"표면차수벽형댐"},
+{q:"혼합시멘트 종류", a:"고로 / 플라이애시 / 실리카 / 포졸란 시멘트"},
+{q:"정적 사운딩 종류", a:"베인 전단시험 / 이스키 미터 / 스웨덴식 관입시험"},
+{q:"도로나 댐에서 다짐도 확인 방법", a:"공기공극률 / 건조밀도 / 강도 / 변형량 / 상대밀도 판정"},
+{q:"조절발파공법의 종류", a:"쿠션 / 프리스플릿팅 / 라인드릴링 / 스무스 블라스팅"},
+{q:"콘크리트의 염화물 함유량 검사 시험", a:"이온 전극법 / 전기 전도법 / 시험지법 / 비색 시험지법"},
+{q:"Cold joint란?", a:"시간차에 의해 계획되지 않은 장소에 생기는 신·구 콘크리트 사이의 이음"},
+{q:"아스팔트의 품질특성 시험", a:"마샬 안정도 / 침입도 / 비중 / 인화점 / 신도시험"},
+{q:"콘크리트 재료의 계량 오차 허용범위", a:"물/시멘트: 1% / 혼화재: 2% / 골재/혼화제: 3%"},
+{q:"진공압밀의 특징", a:"재하중 불필요 / 철거시간 불필요 / 공기 단축 / 효과 확인 가능"},
+{q:"부마찰력의 정의 및 원인", a:"정의: 연약층 침하로 말뚝을 내리는 힘 / 원인: 수위 저하, 조밀 시공, 압밀 진행"},
+{q:"노즐 분출 물로 토사를 절취하여 온송하는 성토공법", a:"물다짐 공법"},
+{q:"진동속도에 영향을 미치는 인자", a:"장약량 / 진원 거리 / 파쇄할 암질계수"},
+{q:"암거 배열방식", a:"자연식 / 머리빗식 / 차단식 / 어골식"},
+{q:"측정관으로 횡방향지지력을 측정하는 현장시험", a:"PMT (Pressure Meter Test)"},
+{q:"포틀랜드 시멘트 종류", a:"저열 / 백색 / 조강 / 내황산 포틀랜드 시멘트"},
+{q:"토류벽의 구성요소", a:"토류판, 띠장, 버팀"},
+{q:"굵은골재 최대치수 기준", a:"철근 순간격 3/4 이하, 부재 최소치수 1/5 이하"},
+{q:"내부진동기 삽입 기준", a:"하층 0.1m 삽입, 간격 0.5m 이하, 시간 5~15초"},
+{q:"말뚝의 정적재하시험 방법", a:"인발시험 / 수평재하시험 / 압축재하시험"},
+{q:"얕은 기초 지반의 파괴형태", a:"전반 / 국부 / 펀칭 전단파괴"},
+{q:"군지수 항목", a:"액성한계 / 소성지수 / No. 200 체통과율"},
+{q:"폐기물 오니를 재활용하는 시멘트", a:"에코시멘트(친환경시멘트)"},
+{q:"OCR(과압밀비)이란?", a:"현재 유효연직응력에 대한 선행압밀하중의 비율"},
+{q:"네일을 타입하여 전단력에 저항하는 시공법", a:"Soil nailing"},
+{q:"무장약공열로 형성된 마감면까지 파괴시키는 발파공법", a:"라인 드릴링 공법(Line drilling)"},
+{q:"웰포인트 스크린을 굴착면보다 깊게 설치하는 이유", a:"공기유입 방지"},
+{q:"여굴이 없고 급속시공이 가능한 굴진기 이용 공법", a:"TBM공법"},
+{q:"새 기초 축조 시 구기초를 보강하는 공법", a:"언더피닝 공법(Under pinning)"},
+{q:"덧씌우기층으로 기존 균열이 전달되어 생기는 균열", a:"반사균열"},
+{q:"성토 접속부에 approach slab를 설치하는 이유", a:"부등침하로 인한 단차 발생 방지"},
+{q:"반투막 중공원통과 농도차를 이용한 지반개량공법", a:"MAIS공법(침투압공법)"},
+{q:"강재와 현장콘크리트로 구성된 말뚝 형태", a:"합성 말뚝"},
+{q:"구멍 밑에서부터 순차적으로 주입하는 그라우팅 방법", a:"Packer 방법"},
+{q:"흙막이벽의 종류", a:"강관말뚝 / 강관널말뚝 / 지하연속벽 / H-pile 토류벽"},
+{q:"동적시험에 의해 결정되는 포장재료 물성", a:"동탄성계수"},
+{q:"콘크리트 막양생제로 쓰이는 것", a:"비닐유제 / 방수지 / 아스팔트유제 / 플라스틱 시트"},
+{q:"폭약 중심에서 자유면까지의 최단거리", a:"최소 저항선"},
+{q:"콘크리트 손식작용의 현상", a:"강도저하 / 철근부식 / 백화 / 수밀성 저하 / 균열발생"},
+{q:"내리막을 이용해 절약하는 굴착 공법", a:"하향 굴착공법"},
+{q:"조기강도 발현이 필요한 경우 쓰는 혼화제", a:"급경제"},
+{q:"기초 지지력 中 흙 압력을 제외한 것", a:"순극한지지력"},
+{q:"염화칼슘 혼합 콘크리트 성질", a:"마모/조기강도/수화열/내구성 증가, 철근부식, 슬럼프 감소"},
+{q:"지하배수공법 중 강제배수공법", a:"Well point / 전기침투 / 침투압(MAIS) / 대기압공법"},
+{q:"원심력 철콘 말뚝 경제적 최대길이", a:"15m"},
+{q:"파일럿 터널을 시공하는 목적", a:"재료운반 / 환기 / 배수"},
+{q:"팽창성이 큰 지반의 조치방법", a:"차수벽설치 / 흙의 안정처리 / 다짐 / 침수법"},
+{q:"혼화제에 의한 지반 안정처리공법의 목적", a:"흙의 개량 / 급속시공 / 강도 및 내구성 개선"},
+{q:"침매공법이 다른 터널공법보다 우수한 점", a:"단면 형상 자유 / 깊은 수심 가능 / 육상 제작으로 높은 신뢰성"},
+{q:"해양콘크리트 철근부식억제방법", a:"철근/표면 피복, 피복두께 크게, 균열 폭 작게"},
+{q:"숏크리트 시공 시 유의사항", a:"노즐 직각 / 반발량 최소 / 공극 방지"},
+{q:"SIP(Soil cement Injection Pile) 장점", a:"다양한 지반 사용 / 무소음/무진동 / 풍화암 시공"},
+{q:"Slurry wall 공법의 단점", a:"공사비 고가 / 공벽붕괴 우려 / smooth wall 곤란 / 이수처리 곤란"},
+{q:"보강토 옹벽의 특징", a:"높은 옹벽 / 연약지반 가능 / 공기 단축 / 건설 공해 적음 / 용지 폭 작음"},
+{q:"날 끝 부근 분사로 침하를 촉진시키는 공법", a:"Jet(분사식) 공법"},
+{q:"변화/침하 균열 방지를 위한 구조물 설치물", a:"신축이음"},
+{q:"교란된 시료의 강도가 시간이 지나며 회복되는 현상", a:"틱소트로피"},
+{q:"시멘트 용액과 토사를 교반하여 지수벽을 만드는 공법", a:"SCW(Soil Cement Wall)공법"},
+{q:"벤토나이트로 채운 구멍에 철근망을 넣어 타설하는 말뚝", a:"Earth drill공법"}
+];
+
+let cards=[], current=0, wrong=[], mode="card", answerVisible=false;
+let examMode = false, score = 0, timer, timeLeft = 600, tempMode = "";
+// 학습 기록을 저장할 배열 추가
+let studyHistory = [];
+
+function start(m){ examMode = false; mode = m; cards = [...originalCards]; initGame(); }
+function openRandomMenu(){
+    document.getElementById("start").style.display="none";
+    document.getElementById("randomMenu").classList.remove("hidden");
+    document.getElementById("methodArea").classList.remove("hidden");
+    document.getElementById("countArea").classList.add("hidden");
+}
+function selectMethod(m){
+    tempMode = m;
+    document.getElementById("methodArea").classList.add("hidden");
+    document.getElementById("countArea").classList.remove("hidden");
+    document.getElementById("selectedMethodText").innerText = m === 'card' ? "📖 카드 모드 선택됨" : "⌨️ 타이핑 모드 선택됨";
+}
+function startRandom(count){
+    examMode = false; mode = tempMode;
+    let shuffled = [...originalCards]; shuffle(shuffled);
+    cards = (count === 'all') ? shuffled : shuffled.slice(0, count);
+    document.getElementById("randomMenu").classList.add("hidden");
+    initGame();
+}
+function startExam(){
+    examMode = true; mode = "typing";
+    let shuffled = [...originalCards]; shuffle(shuffled);
+    cards = shuffled.slice(0, 10); timeLeft = 600;
+    startTimer(); initGame();
+}
+
+function initGame() {
+    current = 0; wrong = []; score = 0; studyHistory = []; // 기록 초기화
+    document.getElementById("start").style.display="none";
+    document.getElementById("main").classList.remove("hidden");
+    document.getElementById("result").classList.add("hidden");
+    applyModeUI();
+    load();
+}
+
+function applyModeUI(){
+    document.getElementById("typingArea").classList.toggle("hidden", mode !== "typing");
+    document.getElementById("showBtn").style.display = (mode === "card" && !examMode) ? "inline-block" : "none";
+    document.getElementById("markButtons").classList.add("hidden");
+}
+
+function load(){
+    if(current >= cards.length){ showResult(); return; }
+    answerVisible = false;
+    document.getElementById("feedback").innerText = "";
+    document.getElementById("input").value = "";
+    
+    if(mode === "card") {
+        document.getElementById("markButtons").classList.add("hidden");
+        document.getElementById("showBtn").style.display = "inline-block";
+    }
+
+    if(!examMode) document.getElementById("progress").innerText = `진행도: ${current+1}/${cards.length}`;
+    
+    document.getElementById("card").innerText = cards[current].q;
+    if(mode === "typing") document.getElementById("input").focus();
+}
+
+function showAnswer(){ 
+    answerVisible = true; 
+    let c = cards[current];
+    document.getElementById("card").innerHTML = `<small style='color:#888; font-size:0.8rem;'>${c.q}</small><br><br><span style='color:var(--primary-color)'>${c.a}</span>`;
+    document.getElementById("markButtons").classList.remove("hidden");
+    document.getElementById("showBtn").style.display = "none";
+}
+
+function similarity(a, b) {
+    if (!a) return 0;
+    a = a.replace(/\s+/g, "").toLowerCase(); b = b.replace(/\s+/g, "").toLowerCase();
+    let dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+    for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+    for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+            dp[i][j] = a[i - 1] === b[j - 1] ? dp[i - 1][j - 1] : Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]) + 1;
+        }
+    }
+    return 1 - dp[a.length][b.length] / Math.max(a.length, b.length);
+}
+
+function check(){
+    let input = document.getElementById("input").value.trim().toLowerCase();
+    let ans = cards[current].a.toLowerCase();
+    let isCorrect = (input !== "") && (similarity(input, ans) >= 0.8 || input.includes(ans));
+
+    // 히스토리에 기록
+    studyHistory.push({ q: cards[current].q, a: cards[current].a, user: input || "(미입력)", correct: isCorrect });
+
+    if(isCorrect) {
+        score++;
+        if(!examMode) document.getElementById("feedback").innerHTML = `<span style="color:var(--success-color)">✅ 맞음</span>`;
+    } else {
+        wrong.push(cards[current]);
+        if(!examMode) document.getElementById("feedback").innerHTML = `<span style="color:var(--danger-color)">❌ 틀림 → ${cards[current].a}</span>`;
+    }
+
+    current++;
+    if(examMode) load();
+    else setTimeout(load, 2000);
+}
+
+function mark(correct){
+    // 카드 모드에서는 사용자가 직접 누르므로 정답 여부와 상관없이 현재 카드 기록
+    studyHistory.push({ q: cards[current].q, a: cards[current].a, user: "카드 확인", correct: correct });
+
+    if(!correct) wrong.push(cards[current]);
+    else score++;
+    current++; 
+    load();
+}
+
+function startTimer(){
+    clearInterval(timer);
+    timer = setInterval(()=>{
+        timeLeft--;
+        let min = Math.floor(timeLeft / 60); let sec = timeLeft % 60;
+        document.getElementById("progress").innerText = `⏱ 남은시간 ${min}:${sec < 10 ? '0' + sec : sec} | ${current+1}/${cards.length}`;
+        if(timeLeft <= 0){ showResult(); }
+    }, 1000);
+}
+
+function showResult(){
+    clearInterval(timer);
+    document.getElementById("main").classList.add("hidden");
+    document.getElementById("result").classList.remove("hidden");
+    document.getElementById("resultText").innerHTML = `맞은 개수: ${score} / ${cards.length}<br>틀린 개수: ${wrong.length}`;
+
+    // 리스트 생성
+    let listHtml = "<h4>학습 리포트</h4>";
+    studyHistory.forEach((item, index) => {
+        const tagClass = item.correct ? "tag-correct" : "tag-wrong";
+        const tagText = item.correct ? "맞음" : "틀림";
+        listHtml += `
+            <div class="result-item">
+                <div class="res-q"><span class="status-tag ${tagClass}">${tagText}</span> ${index + 1}. ${item.q}</div>
+                <div class="res-a">정답: ${item.a}</div>
+                ${mode === 'typing' ? `<div class="res-a" style="color: ${item.correct ? '#4A90E2' : '#dc3545'}">내 답: ${item.user}</div>` : ''}
+            </div>
+        `;
+    });
+    document.getElementById("resultListContainer").innerHTML = listHtml;
+}
+
+function reviewWrong(){ if(wrong.length===0) return; cards = [...wrong]; initGame(); }
+function goHome(){ location.reload(); }
+function backToStart(){ location.reload(); }
+function restart(){ location.reload(); }
+function shuffle(arr){ for(let i=arr.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } }
+
+// 키보드 제어
+document.addEventListener("keydown",e=>{
+    if(e.key==="Enter"){
+        const mainVisible = !document.getElementById("main").classList.contains("hidden");
+        if(mainVisible) {
+            if(mode==="typing") check();
+            else if(!answerVisible) showAnswer(); 
+        }
+    }
+});
+</script>
+</body>
+</html>
